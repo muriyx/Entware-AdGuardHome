@@ -15,13 +15,14 @@ fi
 echo "Testing package: $package_path"
 
 gzip -t "$package_path"
-tar -tzf "$package_path" > /dev/null
+archive_list=$(tar -tzf "$package_path")
 
 for expected in debian-binary control.tar.gz data.tar.gz; do
-    tar -tzf "$package_path" | grep -qx "./$expected" || {
+    if ! printf '%s\n' "$archive_list" |
+        grep -Fx -- "./$expected" >/dev/null; then
         echo "Missing $expected in package" >&2
         exit 1
-    }
+    fi
 done
 
 control_text=$(
