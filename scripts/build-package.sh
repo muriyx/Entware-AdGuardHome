@@ -11,7 +11,7 @@ if [ ! -d "$SOURCE_DIR/.git" ]; then
     exit 1
 fi
 
-for tool in make go tar gzip ar sha256sum awk find sort; do
+for tool in make go tar gzip sha256sum awk find sort; do
     command -v "$tool" >/dev/null 2>&1 || {
         echo "$tool is required" >&2
         exit 1
@@ -106,7 +106,16 @@ rm -f "$package_path"
 
 (
     cd "$WORK_DIR/package"
-    ar rcsD "$package_path" debian-binary control.tar.gz data.tar.gz
+    tar \
+        --format=gnu \
+        --numeric-owner \
+        --sort=name \
+        --mtime="@$SOURCE_DATE_EPOCH" \
+        -cf - \
+        ./debian-binary \
+        ./data.tar.gz \
+        ./control.tar.gz |
+        gzip -9n > "$package_path"
 )
 
 sha256sum "$package_path" > "$package_path.sha256"

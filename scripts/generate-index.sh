@@ -6,7 +6,7 @@ SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # shellcheck source=common.sh
 . "$SCRIPT_DIR/common.sh"
 
-for tool in ar tar gzip sha256sum stat awk sort; do
+for tool in tar gzip sha256sum stat awk sort; do
     command -v "$tool" >/dev/null 2>&1 || {
         echo "$tool is required" >&2
         exit 1
@@ -24,7 +24,10 @@ for package_path in $(find "$REPO_DIR" -maxdepth 1 -type f -name '*.ipk' | sort)
     package_size=$(stat -c '%s' "$package_path")
     package_sha=$(sha256sum "$package_path" | awk '{print $1}')
 
-    control_text=$(ar p "$package_path" control.tar.gz | tar -xzO ./control)
+    control_text=$(
+      tar -xzOf "$package_path" ./control.tar.gz |
+        tar -xzO ./control
+    )
 
     printf '%s\n' "$control_text" >> "$packages_file"
     printf 'Filename: %s\n' "$package_file" >> "$packages_file"
