@@ -12,21 +12,29 @@ if [ -z "$package_path" ]; then
     exit 1
 fi
 
+echo "Testing package: $package_path"
+
+gzip -t "$package_path"
+tar -tzf "$package_path" > /dev/null
+
 for expected in debian-binary control.tar.gz data.tar.gz; do
-    ar t "$package_path" | grep -qx "$expected" || {
+    tar -tzf "$package_path" | grep -qx "./$expected" || {
         echo "Missing $expected in package" >&2
         exit 1
     }
 done
 
-control_text=$(ar p "$package_path" control.tar.gz | tar -xzO ./control)
+control_text=$(
+    tar -xzOf "$package_path" ./control.tar.gz |
+        tar -xzO ./control
+)
 printf '%s\n' "$control_text" | grep -qx "Package: $PACKAGE_NAME"
 printf '%s\n' "$control_text" | grep -qx "Version: ${ADGUARDHOME_VERSION}-${PACKAGE_RELEASE}"
 printf '%s\n' "$control_text" | grep -qx "Architecture: $PACKAGE_ARCH"
 
 package_tmp=$(mktemp -d)
 trap 'rm -rf "$package_tmp"' EXIT HUP INT TERM
-ar p "$package_path" data.tar.gz | tar -xzf - -C "$package_tmp"
+tar -xzOf "$package_path" ./data.tar.gz | tar -xzf - -C "$package_tmp"
 
 [ -x "$package_tmp/opt/bin/AdGuardHome" ]
 [ -x "$package_tmp/opt/etc/init.d/S99adguardhome" ]
