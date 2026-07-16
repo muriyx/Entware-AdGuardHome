@@ -25,7 +25,7 @@ jobs:
         run: ./scripts/prepare-source.sh
 
       - name: Set up Go from upstream go.mod
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@v7
         with:
           go-version-file: .work/AdGuardHome/go.mod
           cache-dependency-path: .work/AdGuardHome/go.sum
