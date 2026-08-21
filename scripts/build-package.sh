@@ -83,6 +83,10 @@ cat > "$WORK_DIR/package/control/conffiles" <<'EOF_CONFFILES'
 /opt/etc/AdGuardHome/adguardhome.conf
 EOF_CONFFILES
 
+install -m 0755 \
+    "$ROOT_DIR/package/adguardhome/postinst" \
+    "$WORK_DIR/package/control/postinst"
+
 # Create deterministic archives.  Numeric ownership is important because the
 # package is assembled on a GitHub-hosted runner but installed as root.
 tar_common="--sort=name --mtime=@$SOURCE_DATE_EPOCH --owner=0 --group=0 --numeric-owner"
