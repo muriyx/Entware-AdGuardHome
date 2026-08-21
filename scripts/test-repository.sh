@@ -33,6 +33,13 @@ printf '%s\n' "$control_text" | grep -qx "Package: $PACKAGE_NAME"
 printf '%s\n' "$control_text" | grep -qx "Version: ${ADGUARDHOME_VERSION}-${PACKAGE_RELEASE}"
 printf '%s\n' "$control_text" | grep -qx "Architecture: $PACKAGE_ARCH"
 
+postinst_text=$(
+    tar -xzOf "$package_path" ./control.tar.gz |
+        tar -xzO ./postinst
+)
+printf '%s\n' "$postinst_text" | grep -Fq '"${PKG_UPGRADE:-}" = "1"'
+printf '%s\n' "$postinst_text" | grep -Fq '/opt/etc/init.d/S99adguardhome restart'
+
 package_tmp=$(mktemp -d)
 trap 'rm -rf "$package_tmp"' EXIT HUP INT TERM
 tar -xzOf "$package_path" ./data.tar.gz | tar -xzf - -C "$package_tmp"
