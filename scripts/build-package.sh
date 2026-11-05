@@ -38,16 +38,7 @@ make -C "$SOURCE_DIR" build-release \
     OS=linux \
     DIST_DIR=dist-entware
 
-release_archive="$SOURCE_DIR/dist-entware/AdGuardHome_linux_arm64.tar.gz"
-if [ ! -f "$release_archive" ]; then
-    echo "Expected release archive was not created: $release_archive" >&2
-    exit 1
-fi
-
-mkdir -p "$WORK_DIR/package/release"
-tar -xzf "$release_archive" -C "$WORK_DIR/package/release"
-
-binary="$WORK_DIR/package/release/AdGuardHome/AdGuardHome"
+binary="$SOURCE_DIR/dist-entware/AdGuardHome_linux_arm64/AdGuardHome/AdGuardHome"
 if [ ! -x "$binary" ]; then
     echo "Built binary was not found: $binary" >&2
     exit 1
